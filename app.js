@@ -67,3 +67,24 @@ app.get("/players/:playerId/", async (request,response) =>{
     const getplayer = await db.get(getQuery);
     response.send(player(getplayer))        
 })
+
+
+app.get("/matches/:matchId/",async (request,response) =>{
+    const {matchId} = request.params;
+    const getMatch = `SELECT * FROM match_details WHERE match_id = ${matchId};`;
+    const result = await db.get(getMatch);
+    response.send(match(result))
+})
+
+
+app.put("/players/:playerId/", async (request,response) =>{
+    const {playerName} = request.body;
+    const{playerId} = request.params;
+    const PutQuery = `UPDATE player_details SET
+                        player_name = '${playerName}'
+                        WHERE player_id = ${playerId};`;
+    await db.run(PutQuery);
+    response.send("Player Details Updated")
+})
+
+
