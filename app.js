@@ -107,3 +107,16 @@ app.get("/players/:playerId/matches", async (request,response) =>{
          
  })
 
+app.get("/players/:playerId/playerScores", async (request,response) =>{
+    const{playerId} = request.params;
+    const score = `SELECT player_id,player_name, sum(score) as totalScore,
+        sum(fours) as totalFours , sum(sixes) as totalSixes FROM player_details inner join player_match_score
+        WHERE player_id = ${playerId};`;
+    const totalResult = await db.get(score);
+    response.send({playerId:totalResult.player_id,
+        playerName:totalResult.player_name,
+        totalScore:totalResult.totalScore,
+        totalFours:totalResult.totalFours,
+        totalSixes:totalResult.totalSixes})         
+})
+
