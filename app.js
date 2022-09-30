@@ -27,9 +27,9 @@ app.listen(3000, ()=>
 
 InitializationDBtoServer();
 
-const plyer = (dbobject) =>{
+const player = (dbobject) =>{
     return {
-        plyerId: dbobject.player_id,
+        playerId: dbobject.player_id,
         playerName: dbobject.player_name,        
     }
       
@@ -87,4 +87,23 @@ app.put("/players/:playerId/", async (request,response) =>{
     response.send("Player Details Updated")
 })
 
+
+app.get("/players/:playerId/matches", async (request,response) =>{
+    const {playerId} = request.params;
+    const query = `SELECT match_id,match,year FROM (player_details inner join player_match_score
+        ON player_details.player_id = player_match_score.player_id) as T inner join match_details ON
+         match_details.match_id = T.match_id WHERE
+         player_id = ${playerId};`;
+    const getresult = await db.all(query);
+    response.send(getresult.map((each) => ({matchId:each.match_id,
+                                        match:each.match,
+                                        year:each.year})))
+ })
+
+
+ app.get("/matches/:matchId/players", async(request,response) =>{
+    const {matchId} = request.params;
+
+         
+ })
 
