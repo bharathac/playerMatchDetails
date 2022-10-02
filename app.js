@@ -90,9 +90,7 @@ app.put("/players/:playerId/", async (request,response) =>{
 
 app.get("/players/:playerId/matches", async (request,response) =>{
     const {playerId} = request.params;
-    const query = `SELECT match_id,match,year FROM (player_details inner join player_match_score
-        ON player_details.player_id = player_match_score.player_id) as T inner join match_details ON
-         match_details.match_id = T.match_id WHERE
+    const query = `SELECT * FROM match_details Natural join player_match_score WHERE
          player_id = ${playerId};`;
     const getresult = await db.all(query);
     response.send(getresult.map((each) => ({matchId:each.match_id,
@@ -103,15 +101,20 @@ app.get("/players/:playerId/matches", async (request,response) =>{
 
  app.get("/matches/:matchId/players", async(request,response) =>{
     const {matchId} = request.params;
+    const result = `SELECT * FROM player_details Natural join player_match_score
+            WHERE match_id = ${matchId};`;
+    const playerDetails = await db.all(result)
+    response.send(playerDetails.map((each) => ({playerId: each.player_id,
+                                        playerName:each.player_name})))
 
          
  })
 
 app.get("/players/:playerId/playerScores", async (request,response) =>{
     const{playerId} = request.params;
-    const score = `SELECT player_id,player_name, sum(score) as totalScore,
-        sum(fours) as totalFours , sum(sixes) as totalSixes FROM player_details inner join player_match_score
-        WHERE player_id = ${playerId};`;
+    const score = `SELECT player_id, player_name, sum(score) as totalScore,
+                    sum(fours) as totalFours, sum(sixes) as totalSixes  FROM player_details Natural join player_match_score WHERE
+                player_id = ${playerId};`;
     const totalResult = await db.get(score);
     response.send({playerId:totalResult.player_id,
         playerName:totalResult.player_name,
@@ -119,4 +122,3 @@ app.get("/players/:playerId/playerScores", async (request,response) =>{
         totalFours:totalResult.totalFours,
         totalSixes:totalResult.totalSixes})         
 })
-
